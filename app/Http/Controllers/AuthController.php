@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,15 +20,16 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Email atau password salah.'
-            ], 401);
+            return errorResponse([], 'The account does not exist.', 401);
         }
 
         // Generate a token
         $token = $user->createToken('ToDoList')->plainTextToken;
 
-        return response()->json(['token' => $token]);
+        return successResponse([
+            'user' => $user,
+            'token' => $token
+        ], 'Login successfully.', 200);
     }
 
     public function logout(Request $request)
@@ -35,23 +37,18 @@ class AuthController extends Controller
         // Menghapus token yang sedang digunakan pengguna
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Berhasil logout..!'
-        ], 200);
+        return successResponse([], 'Logout successfully.');
     }
 
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
-        $request->validate([
-            'name' =>'required|string',
-            'email' =>'required|email|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
 
+        $validated = $request->validated();
+        
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         // Generate a token
