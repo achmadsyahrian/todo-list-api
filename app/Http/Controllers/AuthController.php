@@ -20,7 +20,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return errorResponse([], 'The account does not exist.', 401);
+            return errorResponse('The account does not exist.', 401);
         }
 
         // Generate a token

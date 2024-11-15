@@ -7,17 +7,22 @@ if (!function_exists('successResponse')) {
            'status' => 'success',
            'data' => $data,
            'message' => $message,
+           'meta'=> [
+                'code' => $statusCode,
+           ]
        ], $statusCode);
    }
 }
 
 if (!function_exists('errorResponse')) {
-   function errorResponse($errors = [], $message = 'An error occurred.', $statusCode = 400)
+   function errorResponse($message = 'An error occurred.', $statusCode = 400)
    {
        return response()->json([
            'status' => 'error',
-           'errors' => $errors,
            'message' => $message,
+           'meta'=> [
+                'code' => $statusCode,
+           ]
        ], $statusCode);
    }
 }
